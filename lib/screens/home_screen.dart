@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fluttflix/cubits/cubits.dart';
 import 'package:fluttflix/data/data.dart';
 import 'package:fluttflix/widgets/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -12,15 +14,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   //tell Dart that you are going to initialize the variable at some other point before using it
   late ScrollController _scrollController;
-  double _scrollOffset = 0.0;
 
   @override
   void initState() {
-    _scrollController = ScrollController()..addListener(() {
-      setState(() {
-        _scrollOffset = _scrollController.offset;
+    _scrollController = ScrollController()
+      ..addListener(() {
+        context.bloc<AppBarCubit>().setOffset(_scrollController.offset);
       });
-    });
     super.initState();
   }
 
@@ -42,8 +42,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       appBar: PreferredSize(
         preferredSize: Size(screenSize.width, 50.0),
-        child: CustomAppBar(
-          scrollOffset: _scrollOffset,
+        child: BlocBuilder<AppBarCubit, double>(
+          builder: (context, scrollOffset) {
+            return CustomAppBar(
+              scrollOffset: scrollOffset,
+            );
+          },
         ),
       ),
       body: CustomScrollView(
@@ -64,9 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           SliverToBoxAdapter(
             child: ContentList(
-                key: PageStorageKey('myList'),
-                title: 'My List',
-                contentList: myList,
+              key: PageStorageKey('myList'),
+              title: 'My List',
+              contentList: myList,
             ),
           ),
           SliverToBoxAdapter(
